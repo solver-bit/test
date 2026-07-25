@@ -5,222 +5,226 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXUS Store</title>
     <script src="https://telegram.org"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f5f7; color: #1d1d1f; margin: 0; padding: 0;
+            padding-bottom: 80px; display: flex; flex-direction: column; align-items: center;
+        }
+        .page { display: none; width: 100%; max-width: 400px; padding: 15px; box-sizing: border-box; }
+        .page.active { display: block; }
+        h2 { margin: 15px 0; font-size: 22px; font-weight: bold; }
+
+        /* Главная */
+        .hero-banner {
+            background: linear-gradient(135deg, #111, #333); color: #fff;
+            border-radius: 14px; padding: 20px; margin-bottom: 20px;
+        }
+        .hero-banner h3 { margin: 0 0 8px 0; font-size: 18px; }
+        .hero-banner p { margin: 0; font-size: 13px; color: #d1d1d6; line-height: 1.4; }
+        .menu-btn {
+            background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px;
+            padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+            font-weight: bold; cursor: pointer;
+        }
+
+        /* Поиск */
+        .search-box {
+            width: 100%; background-color: #e8e8ed; border: none; border-radius: 10px;
+            padding: 12px; font-size: 15px; box-sizing: border-box; outline: none; margin-bottom: 15px;
+        }
+
+        /* Карточки */
+        .catalog { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+        .product-card {
+            background-color: #ffffff; border-radius: 12px; padding: 15px;
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid #e5e5ea;
+        }
+        .product-title { font-weight: bold; font-size: 15px; }
+        .product-price { color: #0071e3; font-weight: bold; margin-top: 4px; }
+        .btn-select {
+            background-color: #0071e3; color: #ffffff; border: none; border-radius: 8px;
+            padding: 8px 16px; font-weight: bold; cursor: pointer;
+        }
+        .btn-select.selected { background-color: #ff3b30; }
+
+        /* Форма */
+        .form-container {
+            background-color: #ffffff; border-radius: 12px; padding: 15px;
+            border: 1px solid #e5e5ea; display: flex; flex-direction: column; gap: 10px; margin-top: 15px;
+        }
+        .form-container input {
+            width: 100%; background-color: #f5f5f7; border: 1px solid #d2d2d7;
+            border-radius: 8px; padding: 10px; font-size: 14px; box-sizing: border-box; outline: none;
+        }
+
+        /* Навигация */
+        .navbar {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 400px; height: 65px; background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid #e5e5ea; display: flex; justify-content: space-around; align-items: center;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; color: #86868b;
+            font-size: 11px; cursor: pointer; width: 25%; text-align: center;
+        }
+        .nav-item.active { color: #0071e3; font-weight: bold; }
+        .nav-item .icon { font-size: 20px; margin-bottom: 2px; }
+        .info-text { text-align: center; color: #86868b; padding: 20px; font-size: 14px; }
+    </style>
 </head>
 <body>
 
-    <!-- 🏠 ГЛАВНАЯ СТРАНИЦА -->
-    <div id="page-main" class="page active">
+    <!-- 🏠 ГЛАВНАЯ -->
+    <div id="p-main" class="page active">
         <h2>Главная</h2>
         <div class="hero-banner">
-            <h3>NEXUS Тюнинг Системы</h3>
-            <p>Добро пожаловать в цифровое приложение кастомизации. Выберите компоненты в каталоге, заполните данные и сформируйте автоматическую заявку прямо в чат бота.</p>
+            <h3>NEXUS Тюнинг</h3>
+            <p>Выберите компоненты в каталоге, перейдите в корзину и зафиксируйте данные для автоматического оформления.</p>
         </div>
-        <div class="features-grid">
-            <div class="feature-card" onclick="window.switchPage('catalog')">
-                <div>📦</div>
-                <span>В Каталог</span>
-            </div>
-            <div class="feature-card" onclick="window.switchPage('search')">
-                <div>🔍</div>
-                <span>Поиск</span>
-            </div>
-        </div>
+        <div class="menu-btn" onclick="goPage('catalog')"><span>📦</span> В каталог товаров</div>
+        <div class="menu-btn" onclick="goPage('search')"><span>🔍</span> Поиск по витрине</div>
     </div>
 
-    <!-- 📦 СТРАНИЦА КАТАЛОГА -->
-    <div id="page-catalog" class="page">
+    <!-- 📦 КАТАЛОГ -->
+    <div id="p-catalog" class="page">
         <h2>Каталог</h2>
-        <div id="catalog-list" class="catalog"></div>
+        <div id="cat-box" class="catalog"></div>
     </div>
 
-    <!-- 🔍 СТРАНИЦА ПОИСКА -->
-    <div id="page-search" class="page">
-        <h2>Поиск компонентов</h2>
-        <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search-input" class="search-input" placeholder="Введите название детали...">
-        </div>
-        <div id="search-results" class="catalog">
-            <div class="cart-empty">Начните вводить название товара...</div>
-        </div>
+    <!-- 🔍 ПОИСК -->
+    <div id="p-search" class="page">
+        <h2>Поиск</h2>
+        <input type="text" id="srch-in" class="search-box" placeholder="Начните вводить название..." oninput="doSearch(this.value)">
+        <div id="srch-box" class="catalog"></div>
     </div>
 
-    <!-- 🛒 СТРАНИЦА КОРЗИНЫ -->
-    <div id="page-cart" class="page">
+    <!-- 🛒 КОРЗИНА -->
+    <div id="p-cart" class="page">
         <h2>Корзина</h2>
-        <div id="cart-list" class="catalog"></div>
-        <div id="cart-empty-view" class="cart-empty">Корзина пуста. Перейдите в каталог, чтобы выбрать товары.</div>
+        <div id="cart-box" class="catalog"></div>
+        <div id="cart-empty" class="info-text">Корзина пуста</div>
 
-        <div id="order-form" class="form-container" style="display: none;">
-            <input type="text" id="user_fio" placeholder="Ваши ФИО и Город через пробел">
-            <input type="text" id="user_phone" placeholder="Контактный телефон (+375...)">
+        <div id="cart-form" class="form-container" style="display: none;">
+            <input type="text" id="fio" placeholder="Ваши ФИО и Город через пробел" oninput="checkForm()">
+            <input type="text" id="phone" placeholder="Контактный телефон (+375...)" oninput="checkForm()">
         </div>
     </div>
 
-    <!-- 📌 НАВИГАЦИОННАЯ ПАНЕЛЬ -->
+    <!-- 📌 МЕНЮ -->
     <div class="navbar">
-        <div class="nav-item active" id="btn-nav-main" onclick="window.switchPage('main')">
-            <span class="icon">🏠</span><span>Главная</span>
-        </div>
-        <div class="nav-item" id="btn-nav-catalog" onclick="window.switchPage('catalog')">
-            <span class="icon">📦</span><span>Каталог</span>
-        </div>
-        <div class="nav-item" id="btn-nav-search" onclick="window.switchPage('search')">
-            <span class="icon">🔍</span><span>Поиск</span>
-        </div>
-        <div class="nav-item" id="btn-nav-cart" onclick="window.switchPage('cart')">
-            <div id="cart-badge" class="badge">0</div>
-            <span class="icon">🛒</span><span>Корзина</span>
-        </div>
+        <div class="nav-item active" id="n-main" onclick="goPage('main')"><span class="icon">🏠</span><span>Главная</span></div>
+        <div class="nav-item" id="n-catalog" onclick="goPage('catalog')"><span class="icon">📦</span><span>Каталог</span></div>
+        <div class="nav-item" id="n-search" onclick="goPage('search')"><span class="icon">🔍</span><span>Поиск</span></div>
+        <div class="nav-item" id="n-cart" onclick="goPage('cart')"><span class="icon">🛒</span><span>Корзина</span></div>
     </div>
-
-    <!-- МОДУЛЬНЫЙ СКРИПТ УПРАВЛЕНИЯ ПРИЛОЖЕНИЕМ -->
-    <script type="module">
-        import { PRODUCTS } from './products.js';
-
+    <script>
         const tg = window.Telegram?.WebApp;
         if (tg) { tg.ready(); tg.expand(); }
 
+        const ITEMS = [
+            { id: 1, name: "Комплект оптики (Тип А)", price: 1200 },
+            { id: 2, name: "Комплект оптики (Тип Б)", price: 850 },
+            { id: 3, name: "Модуль доп. тюнинга", price: 450 },
+            { id: 4, name: "Спойлер карбоновый", price: 600 },
+            { id: 5, name: "Выхлопная система Спорт", price: 2100 }
+        ];
+
         let cart = [];
 
-        window.switchPage = function(pageId) {
+        function goPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-            document.getElementById(`page-${pageId}`).classList.add('active');
-            document.getElementById(`btn-nav-${pageId}`).classList.add('active');
-
-            if (pageId === 'cart') renderCart();
-            validateOrderForm();
+            document.getElementById(`p-${id}`).classList.add('active');
+            document.getElementById(`n-${id}`).classList.add('active');
+            if (id === 'cart') drawCart();
+            checkForm();
         }
 
-        function renderCatalog() {
-            const container = document.getElementById('catalog-list');
-            if (container) container.innerHTML = PRODUCTS.map(prod => createProductCard(prod)).join('');
+        function drawCatalog() {
+            const box = document.getElementById('cat-box');
+            if (box) box.innerHTML = ITEMS.map(item => htmlItem(item)).join('');
         }
 
-        function createProductCard(prod) {
-            const isInCart = cart.some(item => item.id === prod.id);
-            const btnText = isInCart ? "Убрать" : "Выбрать";
-            const btnClass = isInCart ? "btn-select selected" : "btn-select";
-
+        function htmlItem(item) {
+            const has = cart.some(c => c.id === item.id);
             return `
                 <div class="product-card">
                     <div>
-                        <div class="product-title">${prod.name}</div>
-                        <div class="product-price">${prod.price} BYN</div>
+                        <div class="product-title">${item.name}</div>
+                        <div class="product-price">${item.price} BYN</div>
                     </div>
-                    <button class="${btnClass}" onclick="window.toggleCartItem(${prod.id})">${btnText}</button>
+                    <button class="btn-select ${has ? 'selected' : ''}" onclick="clickItem(${item.id})">${has ? 'Убрать' : 'Выбрать'}</button>
                 </div>
             `;
         }
 
-        window.toggleCartItem = function(id) {
-            const prod = PRODUCTS.find(p => p.id === id);
-            const index = cart.findIndex(item => item.id === id);
+        function clickItem(id) {
+            const idx = cart.findIndex(c => c.id === id);
+            if (idx === -1) cart.push(ITEMS.find(item => item.id === id));
+            else cart.splice(idx, 1);
 
-            if (index === -1) cart.push(prod);
-            else cart.splice(index, 1);
-
-            updateBadges();
-            renderCatalog();
-
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) handleSearch(searchInput.value);
-
-            validateOrderForm();
+            drawCatalog();
+            doSearch(document.getElementById('srch-in').value);
+            checkForm();
         }
 
-        function updateBadges() {
-            const badge = document.getElementById('cart-badge');
-            if (!badge) return;
-            if (cart.length > 0) {
-                badge.textContent = cart.length;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
-            }
+        function doSearch(val) {
+            const box = document.getElementById('srch-box');
+            if (!box) return;
+            if (!val.trim()) { box.innerHTML = '<div class="info-text">Начните вводить название...</div>'; return; }
+            const res = ITEMS.filter(i => i.name.toLowerCase().includes(val.toLowerCase()));
+            box.innerHTML = res.length ? res.map(item => htmlItem(item)).join('') : '<div class="info-text">Ничего не найдено</div>';
         }
 
-        function handleSearch(query) {
-            const container = document.getElementById('search-results');
-            if (!container) return;
-            if (!query.trim()) {
-                container.innerHTML = `<div class="cart-empty">Начните вводить название товара...</div>`;
-                return;
-            }
+        function drawCart() {
+            const box = document.getElementById('cart-box');
+            const empty = document.getElementById('cart-empty');
+            const form = document.getElementById('cart-form');
 
-            const filtered = PRODUCTS.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="cart-empty">Ничего не найдено</div>`;
-            } else {
-                container.innerHTML = filtered.map(prod => createProductCard(prod)).join('');
-            }
-        }
+            if (!box || !empty || !form) return;
+            if (!cart.length) { box.innerHTML = ''; empty.style.display = 'block'; form.style.display = 'none'; return; }
 
-        function renderCart() {
-            const container = document.getElementById('cart-list');
-            const emptyView = document.getElementById('cart-empty-view');
-            const formContainer = document.getElementById('order-form');
-
-            if (!container || !emptyView || !formContainer) return;
-
-            if (cart.length === 0) {
-                container.innerHTML = '';
-                emptyView.style.display = 'block';
-                formContainer.style.display = 'none';
-            } else {
-                emptyView.style.display = 'none';
-                formContainer.style.display = 'flex';
-                container.innerHTML = cart.map(prod => `
-                    <div class="product-card">
-                        <div>
-                            <div class="product-title">${prod.name}</div>
-                            <div class="product-price">${prod.price} BYN</div>
-                        </div>
-                        <button class="btn-select selected" onclick="window.toggleCartItem(${prod.id})">Убрать</button>
+            empty.style.display = 'none';
+            form.style.display = 'flex';
+            box.innerHTML = cart.map(item => `
+                <div class="product-card">
+                    <div>
+                        <div class="product-title">${item.name}</div>
+                        <div class="product-price">${item.price} BYN</div>
                     </div>
-                `).join('');
-            }
+                    <button class="btn-select selected" onclick="clickItem(${item.id}); drawCart();">Убрать</button>
+                </div>
+            `).join('');
         }
 
-        window.validateOrderForm = function() {
+        function checkForm() {
             if (!tg) return;
-            const activePageObj = document.querySelector('.page.active');
-            if (!activePageObj) return;
+            const isCart = document.getElementById('p-cart').classList.contains('active');
+            const userFio = document.getElementById('fio').value.trim();
+            const userPhone = document.getElementById('phone').value.trim();
 
-            const activePage = activePageObj.id;
-            const fio = document.getElementById("user_fio")?.value.trim() || "";
-            const phone = document.getElementById("user_phone")?.value.trim() || "";
-
-            if (activePage === 'page-cart' && cart.length > 0 && fio.length > 4 && phone.length > 8) {
-                let totalSum = cart.reduce((sum, item) => sum + item.price, 0);
-                tg.MainButton.text = "ОФОРМИТЬ ЗАКАЗ (" + totalSum + " BYN)";
+            if (isCart && cart.length > 0 && userFio.length > 4 && userPhone.length > 8) {
+                const total = cart.reduce((sum, i) => sum + i.price, 0);
+                tg.MainButton.text = "ОФОРМИТЬ ЗАКАЗ (" + total + " BYN)";
                 tg.MainButton.show();
             } else {
                 tg.MainButton.hide();
             }
         }
 
-        // Привязка событий ввода текста
-        document.getElementById('search-input')?.addEventListener('input', (e) => handleSearch(e.target.value));
-        document.getElementById('user_fio')?.addEventListener('input', () => window.validateOrderForm());
-        document.getElementById('user_phone')?.addEventListener('input', () => window.validateOrderForm());
-
         if (tg) {
-            tg.onEvent('mainButtonClicked', function() {
-                const fio = document.getElementById("user_fio").value.trim();
-                const phone = document.getElementById("user_phone").value.trim();
-                let goodsList = cart.map(i => i.name).join(' + ');
-
-                tg.sendData(goodsList + "|||" + fio + "|||" + phone);
+            tg.onEvent('mainButtonClick', function() {
+                const userFio = document.getElementById('fio').value.trim();
+                const userPhone = document.getElementById('phone').value.trim();
+                const list = cart.map(c => c.name).join(' + ');
+                tg.sendData(list + "|||" + userFio + "|||" + userPhone);
                 tg.close();
             });
         }
 
-        // Запуск
-        renderCatalog();
+        drawCatalog();
     </script>
 </body>
 </html>
