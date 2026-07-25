@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXUS Store</title>
-    <script src="https://telegram.org"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #f5f5f7; color: #1d1d1f; margin: 0; padding: 0;
-            padding-bottom: 80px; display: flex; flex-direction: column; align-items: center;
+            padding-bottom: 90px; display: flex; flex-direction: column; align-items: center;
         }
         .page { display: none; width: 100%; max-width: 400px; padding: 15px; box-sizing: border-box; }
         .page.active { display: block; }
@@ -22,6 +22,7 @@
         }
         .hero-banner h3 { margin: 0 0 8px 0; font-size: 18px; }
         .hero-banner p { margin: 0; font-size: 13px; color: #d1d1d6; line-height: 1.4; }
+
         .menu-btn {
             background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px;
             padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
@@ -29,13 +30,12 @@
         }
         .menu-btn:active { background-color: #f5f5f7; }
 
-        /* Блок информации О нас */
+        /* Вкладка О Нас */
         .info-card {
             background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 14px;
-            padding: 20px; margin-top: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            padding: 20px; display: flex; flex-direction: column; gap: 12px;
         }
-        .info-card p { margin: 0 0 12px 0; font-size: 14px; color: #1d1d1f; line-height: 1.5; }
-        .info-card p:last-child { margin-bottom: 0; }
+        .info-card p { margin: 0; font-size: 14px; color: #1d1d1f; line-height: 1.5; }
 
         /* Поиск */
         .search-box {
@@ -43,7 +43,7 @@
             padding: 12px; font-size: 15px; box-sizing: border-box; outline: none; margin-bottom: 15px;
         }
 
-        /* Карточки */
+        /* Витрина */
         .catalog { display: flex; flex-direction: column; gap: 12px; width: 100%; }
         .product-card {
             background-color: #ffffff; border-radius: 12px; padding: 15px;
@@ -51,13 +51,14 @@
         }
         .product-title { font-weight: bold; font-size: 15px; }
         .product-price { color: #0071e3; font-weight: bold; margin-top: 4px; }
+
         .btn-select {
             background-color: #0071e3; color: #ffffff; border: none; border-radius: 8px;
             padding: 8px 16px; font-weight: bold; cursor: pointer;
         }
         .btn-select.selected { background-color: #ff3b30; }
 
-        /* Форма */
+        /* Корзина */
         .form-container {
             background-color: #ffffff; border-radius: 12px; padding: 15px;
             border: 1px solid #e5e5ea; display: flex; flex-direction: column; gap: 12px; margin-top: 15px;
@@ -67,16 +68,16 @@
             border-radius: 8px; padding: 12px; font-size: 14px; box-sizing: border-box; outline: none;
         }
 
-        /* КНОПКА ОТПРАВКИ ВНУТРИ ИНТЕРФЕЙСА */
+        /* Внутренняя кнопка формы заказа */
         .btn-submit {
             width: 100%; background-color: #0071e3; color: #ffffff; border: none;
             border-radius: 10px; padding: 14px; font-size: 16px; font-weight: bold;
             cursor: pointer; display: none; text-align: center; box-sizing: border-box;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: background-color 0.2s; margin-top: 5px;
         }
-        .btn-submit:active { background-color: #0056b3; transform: scale(0.98); }
+        .btn-submit:active { background-color: #0056b3; }
 
-        /* Навигация */
+        /* Таб-бар меню навигации */
         .navbar {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
             width: 100%; max-width: 400px; height: 65px; background-color: rgba(255, 255, 255, 0.9);
@@ -104,17 +105,16 @@
         </div>
         <div class="menu-btn" onclick="goPage('catalog')"><span>📦</span> В каталог товаров</div>
         <div class="menu-btn" onclick="goPage('search')"><span>🔍</span> Поиск по витрине</div>
-        <!-- ИСПРАВЛЕНО: Кнопка вместо длинного текста -->
         <div class="menu-btn" onclick="goPage('about')"><span>ℹ️</span> О нас</div>
     </div>
 
-    <!-- ℹ️ СТРАНИЦА О НАС -->
+    <!-- ℹ️ О НАC -->
     <div id="p-about" class="page">
         <h2>О магазине NEXUS</h2>
         <div class="info-card">
-            <p><b>NEXUS Store</b> — это премиальные и высокотехнологичные компоненты автомобильной кастомизации и тюнинга.</p>
-            <p>⚙️ Мы обеспечиваем двухконтурную проверку качества каждой детали и предоставляем официальную гарантию.</p>
-            <p>🕒 Наша автоматизированная система обработки заказов работает 24/7 без выходных.</p>
+            <p><b>NEXUS Store</b> — это премиальные и высокотехнологичные компоненты кастомизации авто.</p>
+            <p>⚙️ Мы обеспечиваем двухконтурную проверку качества каждой детали и предоставляем гарантию.</p>
+            <p>🕒 Наша автоматизированная система обработки заказов работает для вас 24/7 без выходных.</p>
             <p>🚚 Быстрая и безопасная доставка осуществляется курьерскими службами по всей стране.</p>
         </div>
     </div>
@@ -141,12 +141,11 @@
         <div id="cart-form" class="form-container" style="display: none;">
             <input type="text" id="fio" placeholder="Ваши ФИО и Город через пробел" oninput="checkForm()">
             <input type="text" id="phone" placeholder="Контактный телефон (+375...)" oninput="checkForm()">
-            <!-- ИСПРАВЛЕНО: Кнопка отправки внутри формы под номером телефона -->
             <button id="submit-order-btn" class="btn-submit" onclick="sendOrderData()">Оформить заказ</button>
         </div>
     </div>
 
-    <!-- 📌 МЕНЮ -->
+    <!-- 📌 МЕНЮ НАВИГАЦИИ -->
     <div class="navbar">
         <div class="nav-item active" id="n-main" onclick="goPage('main')"><span class="icon">🏠</span><span>Главная</span></div>
         <div class="nav-item" id="n-catalog" onclick="goPage('catalog')"><span class="icon">📦</span><span>Каталог</span></div>
@@ -155,7 +154,12 @@
     </div>
     <script>
         const tg = window.Telegram?.WebApp;
-        if (tg) { tg.ready(); tg.expand(); }
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            // Принудительно навсегда убираем нативную нижнюю кнопку подвала Telegram
+            tg.MainButton.hide();
+        }
 
         const ITEMS = [
             { id: 1, name: "Комплект оптики (Тип А)", price: 1200 },
@@ -168,17 +172,23 @@
         let cart = [];
 
         function goPage(id) {
+            // Скрываем абсолютно все страницы
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // Снимаем активность со всех кнопок таб-бара
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
+            // Включаем нужную страницу
             const targetPage = document.getElementById(`p-${id}`);
             if (targetPage) targetPage.classList.add('active');
 
-            // Кнопки меню активируются только для основных 4 вкладок
+            // Подсвечиваем иконку в меню (если она существует для этой страницы)
             const targetNav = document.getElementById(`n-${id}`);
             if (targetNav) targetNav.classList.add('active');
 
+            // Если перешли в корзину — перерисовываем её состояние
             if (id === 'cart') drawCart();
+
+            // Обновляем валидацию встроенной кнопки
             checkForm();
         }
 
@@ -206,7 +216,10 @@
             else cart.splice(idx, 1);
 
             drawCatalog();
-            doSearch(document.getElementById('srch-in').value);
+
+            const searchInput = document.getElementById('srch-in');
+            if (searchInput) doSearch(searchInput.value);
+
             checkForm();
         }
 
@@ -224,7 +237,13 @@
             const form = document.getElementById('cart-form');
 
             if (!box || !empty || !form) return;
-            if (!cart.length) { box.innerHTML = ''; empty.style.display = 'block'; form.style.display = 'none'; return; }
+
+            if (!cart.length) {
+                box.innerHTML = '';
+                empty.style.display = 'block';
+                form.style.display = 'none';
+                return;
+            }
 
             empty.style.display = 'none';
             form.style.display = 'flex';
@@ -243,35 +262,29 @@
             const btnSubmit = document.getElementById('submit-order-btn');
             if (!btnSubmit) return;
 
-            const isCart = document.getElementById('p-cart').classList.contains('active');
-            const userFio = document.getElementById('fio').value.trim();
-            const userPhone = document.getElementById('phone').value.trim();
+            const userFio = document.getElementById('fio')?.value.trim() || "";
+            const userPhone = document.getElementById('phone')?.value.trim() || "";
 
-            // ИСПРАВЛЕНО: Теперь управляем видимостью встроенной HTML-кнопки
-            if (isCart && cart.length > 0 && userFio.length > 4 && userPhone.length > 8) {
+            // ИСПРАВЛЕНО: Кнопка внутри страницы завязывается только на валидность текста в инпутах
+            if (cart.length > 0 && userFio.length > 4 && userPhone.length > 8) {
                 const total = cart.reduce((sum, i) => sum + i.price, 0);
                 btnSubmit.textContent = `ОФОРМИТЬ ЗАКАЗ (${total} BYN)`;
                 btnSubmit.style.display = 'block';
             } else {
                 btnSubmit.style.display = 'none';
             }
-
-            // Принудительно отключаем родную кнопку подвала Telegram
-            if (tg) { tg.MainButton.hide(); }
         }
 
-        // ИСПРАВЛЕНО: Функция вызывается при клике на новую встроенную HTML-кнопку
         function sendOrderData() {
             const userFio = document.getElementById('fio').value.trim();
             const userPhone = document.getElementById('phone').value.trim();
             const list = cart.map(c => c.name).join(' + ');
 
             if (tg) {
-                // Пакет данных улетает через sendData прямо в ваш start.py бэкенд
                 tg.sendData(list + "|||" + userFio + "|||" + userPhone);
                 tg.close();
             } else {
-                alert("Ошибка: Запустите приложение внутри Telegram!");
+                alert(`Имитация отправки боту:\n${list}\n${userFio}\n${userPhone}`);
             }
         }
 
