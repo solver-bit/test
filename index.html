@@ -25,8 +25,17 @@
         .menu-btn {
             background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 12px;
             padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
-            font-weight: bold; cursor: pointer;
+            font-weight: bold; cursor: pointer; transition: background-color 0.15s;
         }
+        .menu-btn:active { background-color: #f5f5f7; }
+
+        /* Блок информации О нас */
+        .info-card {
+            background-color: #ffffff; border: 1px solid #e5e5ea; border-radius: 14px;
+            padding: 20px; margin-top: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .info-card p { margin: 0 0 12px 0; font-size: 14px; color: #1d1d1f; line-height: 1.5; }
+        .info-card p:last-child { margin-bottom: 0; }
 
         /* Поиск */
         .search-box {
@@ -51,12 +60,21 @@
         /* Форма */
         .form-container {
             background-color: #ffffff; border-radius: 12px; padding: 15px;
-            border: 1px solid #e5e5ea; display: flex; flex-direction: column; gap: 10px; margin-top: 15px;
+            border: 1px solid #e5e5ea; display: flex; flex-direction: column; gap: 12px; margin-top: 15px;
         }
         .form-container input {
             width: 100%; background-color: #f5f5f7; border: 1px solid #d2d2d7;
-            border-radius: 8px; padding: 10px; font-size: 14px; box-sizing: border-box; outline: none;
+            border-radius: 8px; padding: 12px; font-size: 14px; box-sizing: border-box; outline: none;
         }
+
+        /* КНОПКА ОТПРАВКИ ВНУТРИ ИНТЕРФЕЙСА */
+        .btn-submit {
+            width: 100%; background-color: #0071e3; color: #ffffff; border: none;
+            border-radius: 10px; padding: 14px; font-size: 16px; font-weight: bold;
+            cursor: pointer; display: none; text-align: center; box-sizing: border-box;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .btn-submit:active { background-color: #0056b3; transform: scale(0.98); }
 
         /* Навигация */
         .navbar {
@@ -64,6 +82,7 @@
             width: 100%; max-width: 400px; height: 65px; background-color: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border-top: 1px solid #e5e5ea; display: flex; justify-content: space-around; align-items: center;
+            z-index: 9999;
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center; color: #86868b;
@@ -85,7 +104,19 @@
         </div>
         <div class="menu-btn" onclick="goPage('catalog')"><span>📦</span> В каталог товаров</div>
         <div class="menu-btn" onclick="goPage('search')"><span>🔍</span> Поиск по витрине</div>
-        <div class="menu-btn" style="cursor: default;"><span>ℹ️</span> NEXUS: Премиальные компоненты кастомизации. Работаем 24/7. Доставка по всей стране.</div>
+        <!-- ИСПРАВЛЕНО: Кнопка вместо длинного текста -->
+        <div class="menu-btn" onclick="goPage('about')"><span>ℹ️</span> О нас</div>
+    </div>
+
+    <!-- ℹ️ СТРАНИЦА О НАС -->
+    <div id="p-about" class="page">
+        <h2>О магазине NEXUS</h2>
+        <div class="info-card">
+            <p><b>NEXUS Store</b> — это премиальные и высокотехнологичные компоненты автомобильной кастомизации и тюнинга.</p>
+            <p>⚙️ Мы обеспечиваем двухконтурную проверку качества каждой детали и предоставляем официальную гарантию.</p>
+            <p>🕒 Наша автоматизированная система обработки заказов работает 24/7 без выходных.</p>
+            <p>🚚 Быстрая и безопасная доставка осуществляется курьерскими службами по всей стране.</p>
+        </div>
     </div>
 
     <!-- 📦 КАТАЛОГ -->
@@ -110,6 +141,8 @@
         <div id="cart-form" class="form-container" style="display: none;">
             <input type="text" id="fio" placeholder="Ваши ФИО и Город через пробел" oninput="checkForm()">
             <input type="text" id="phone" placeholder="Контактный телефон (+375...)" oninput="checkForm()">
+            <!-- ИСПРАВЛЕНО: Кнопка отправки внутри формы под номером телефона -->
+            <button id="submit-order-btn" class="btn-submit" onclick="sendOrderData()">Оформить заказ</button>
         </div>
     </div>
 
@@ -137,8 +170,14 @@
         function goPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(`p-${id}`).classList.add('active');
-            document.getElementById(`n-${id}`).classList.add('active');
+
+            const targetPage = document.getElementById(`p-${id}`);
+            if (targetPage) targetPage.classList.add('active');
+
+            // Кнопки меню активируются только для основных 4 вкладок
+            const targetNav = document.getElementById(`n-${id}`);
+            if (targetNav) targetNav.classList.add('active');
+
             if (id === 'cart') drawCart();
             checkForm();
         }
@@ -201,29 +240,39 @@
         }
 
         function checkForm() {
-            if (!tg) return;
+            const btnSubmit = document.getElementById('submit-order-btn');
+            if (!btnSubmit) return;
+
             const isCart = document.getElementById('p-cart').classList.contains('active');
             const userFio = document.getElementById('fio').value.trim();
             const userPhone = document.getElementById('phone').value.trim();
 
+            // ИСПРАВЛЕНО: Теперь управляем видимостью встроенной HTML-кнопки
             if (isCart && cart.length > 0 && userFio.length > 4 && userPhone.length > 8) {
                 const total = cart.reduce((sum, i) => sum + i.price, 0);
-                tg.MainButton.text = "ОФОРМИТЬ ЗАКАЗ (" + total + " BYN)";
-                tg.MainButton.show();
+                btnSubmit.textContent = `ОФОРМИТЬ ЗАКАЗ (${total} BYN)`;
+                btnSubmit.style.display = 'block';
             } else {
-                tg.MainButton.hide();
+                btnSubmit.style.display = 'none';
             }
+
+            // Принудительно отключаем родную кнопку подвала Telegram
+            if (tg) { tg.MainButton.hide(); }
         }
 
-        if (tg) {
-            tg.onEvent('mainButtonClick', function() {
-                const userFio = document.getElementById('fio').value.trim();
-                const userPhone = document.getElementById('phone').value.trim();
-                const list = cart.map(c => c.name).join(' + ');
-                // Отправляем склеенный пакет данных обратно в Telegram-бота
+        // ИСПРАВЛЕНО: Функция вызывается при клике на новую встроенную HTML-кнопку
+        function sendOrderData() {
+            const userFio = document.getElementById('fio').value.trim();
+            const userPhone = document.getElementById('phone').value.trim();
+            const list = cart.map(c => c.name).join(' + ');
+
+            if (tg) {
+                // Пакет данных улетает через sendData прямо в ваш start.py бэкенд
                 tg.sendData(list + "|||" + userFio + "|||" + userPhone);
                 tg.close();
-            });
+            } else {
+                alert("Ошибка: Запустите приложение внутри Telegram!");
+            }
         }
 
         drawCatalog();
