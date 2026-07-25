@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXUS Store</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://telegram.org"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -157,11 +157,11 @@
         if (tg) {
             tg.ready();
             tg.expand();
-            // Принудительно навсегда убираем нативную нижнюю кнопку подвала Telegram
             tg.MainButton.hide();
         }
 
-        const ITEMS = [
+        // Стартовый ассортимент по умолчанию
+        let ITEMS = [
             { id: 1, name: "Комплект оптики (Тип А)", price: 1200 },
             { id: 2, name: "Комплект оптики (Тип Б)", price: 850 },
             { id: 3, name: "Модуль доп. тюнинга", price: 450 },
@@ -169,26 +169,40 @@
             { id: 5, name: "Выхлопная система Спорт", price: 2100 }
         ];
 
+        // 🌌 ИИ-РАСПАКОВЩИК: Читаем переданные ботом из БД цены прямо из адресной строки URL
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pricesParam = urlParams.get('prices'); // Достаем строку вида "1300_900_500_650_2200"
+
+            if (pricesParam) {
+                const parsedPrices = pricesParam.split('_').map(Number);
+                // Если количество совпадает с каталогом, обновляем цены динамически
+                if (parsedPrices.length === ITEMS.length) {
+                    ITEMS.forEach((item, index) => {
+                        if (!isNaN(parsedPrices[index])) {
+                            item.price = parsedPrices[index];
+                        }
+                    });
+                    console.log("[NEXUS LOG] Цены успешно синхронизированы с СУБД:", ITEMS);
+                }
+            }
+        } catch (e) {
+            console.error("[NEXUS ERROR] Ошибка парсинга динамического прайс-листа:", e);
+        }
+
         let cart = [];
 
         function goPage(id) {
-            // Скрываем абсолютно все страницы
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            // Снимаем активность со всех кнопок таб-бара
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-            // Включаем нужную страницу
             const targetPage = document.getElementById(`p-${id}`);
             if (targetPage) targetPage.classList.add('active');
 
-            // Подсвечиваем иконку в меню (если она существует для этой страницы)
             const targetNav = document.getElementById(`n-${id}`);
             if (targetNav) targetNav.classList.add('active');
 
-            // Если перешли в корзину — перерисовываем её состояние
             if (id === 'cart') drawCart();
-
-            // Обновляем валидацию встроенной кнопки
             checkForm();
         }
 
@@ -263,9 +277,15 @@
             if (!btnSubmit) return;
 
             const userFio = document.getElementById('fio')?.value.trim() || "";
-            const userPhone = document.getElementById('phone')?.value.trim() || "";
+            const phoneField = document.getElementById('phone');
+            let userPhone = phoneField ? phoneField.value.trim() : "";
 
-            // ИСПРАВЛЕНО: Кнопка внутри страницы завязывается только на валидность текста в инпутах
+            // Автоподстановка плюса для удобства пользователя
+            if (userPhone && !userPhone.startsWith('+')) {
+                userPhone = '+' + userPhone;
+                if (phoneField) phoneField.value = userPhone;
+            }
+
             if (cart.length > 0 && userFio.length > 4 && userPhone.length > 8) {
                 const total = cart.reduce((sum, i) => sum + i.price, 0);
                 btnSubmit.textContent = `ОФОРМИТЬ ЗАКАЗ (${total} BYN)`;
@@ -284,7 +304,7 @@
                 tg.sendData(list + "|||" + userFio + "|||" + userPhone);
                 tg.close();
             } else {
-                alert(`Имитация отправки боту:\n${list}\n${userFio}\n${userPhone}`);
+                alert(`Локальный тест:\n${list}\n${userFio}\n${userPhone}`);
             }
         }
 
