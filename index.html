@@ -160,36 +160,36 @@
             tg.MainButton.hide();
         }
 
-        // Стартовый базовый ассортимент (запасной вариант)
-        let ITEMS = [
-            { id: 1, name: "Комплект оптики (Тип А)", price: 1200 },
-            { id: 2, name: "Комплект оптики (Тип Б)", price: 850 },
-            { id: 3, name: "Модуль доп. тюнинга", price: 450 },
-            { id: 4, name: "Спойлер карбоновый", price: 600 },
-            { id: 5, name: "Выхлопная система Спорт", price: 2100 }
-        ];
+        // ВНИМАНИЕ: Замените этот URL на реальный адрес вашего ngrok-туннеля (например, https://ngrok-free.app)
+        // Если вы тестируете Mini App локально в браузере на одном ПК, оставьте http://localhost:8000/api/products
+        const API_URL = "http://localhost:8000/api/products";
 
-        // 🌌 ИСПРАВЛЕННЫЙ ИИ-РАСПАКОВЩИК: Идеально читает русские буквы, переданные в Base64
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const dataParam = urlParams.get('pdata');
-
-            if (dataParam) {
-                // Декодируем из Base64 и расшифровываем UTF-8 символы кириллицы
-                const rawB64 = atob(dataParam);
-                const decodedJson = decodeURIComponent(rawB64);
-
-                const remoteItems = JSON.parse(decodedJson);
-                if (Array.isArray(remoteItems) && remoteItems.length > 0) {
-                    ITEMS = remoteItems; // Замещаем на динамический каталог, полученный из SQLite
-                    console.log("[NEXUS LOG] Успешная синхронизация СУБД:", ITEMS);
-                }
-            }
-        } catch (e) {
-            console.error("[NEXUS ERROR] Ошибка синхронизации каталога с СУБД:", e);
-        }
-
+        let ITEMS = [];
         let cart = [];
+
+        // 🌌 АСИНХРОННЫЙ СИНХРОНИЗАТОР: Запрашивает актуальные товары из SQLite через FastAPI
+        async function loadLiveCatalog() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    ITEMS = data;
+                    console.log("[NEXUS API] Ассортимент успешно загружен из СУБД:", ITEMS);
+                    drawCatalog();
+                }
+            } catch (e) {
+                console.error("[NEXUS API ERROR] Не удалось связаться с сервером БД. Используем резервный прайс:", e);
+                // Запасной прайс-лист на случай, если бэкенд выключен
+                ITEMS = [
+                    { id: 1, name: "Комплект оптики (Тип А)", price: 1200 },
+                    { id: 2, name: "Комплект оптики (Тип Б)", price: 850 },
+                    { id: 3, name: "Модуль доп. тюнинга", price: 450 },
+                    { id: 4, name: "Спойлер карбоновый", price: 600 },
+                    { id: 5, name: "Выхлопная система Спорт", price: 2100 }
+                ];
+                drawCatalog();
+            }
+        }
 
         function goPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -306,7 +306,8 @@
             }
         }
 
-        drawCatalog();
+        // Запуск живой синхронизации ассортимента при инициализации страницы
+        loadLiveCatalog();
     </script>
 </body>
 </html>
