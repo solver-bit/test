@@ -16,7 +16,6 @@
         h2 { margin: 15px 0 5px 0; font-size: 20px; text-align: center; font-weight: 700; }
         .subtitle { color: #86868b; font-size: 13px; margin-bottom: 15px; text-align: center; }
 
-        /* КРАСИВЫЙ БЛОК ЖИВОЙ КОРЗИНЫ */
         .cart-status {
             width: 100%; max-width: 368px;
             background: linear-gradient(135deg, #0071e3 0%, #00c6ff 100%);
@@ -46,7 +45,7 @@
             border: none; border-radius: 10px; padding: 8px 16px;
             font-size: 13px; font-weight: 600; cursor: pointer; transition: background-color 0.2s;
         }
-        .btn-select.selected { background-color: #ff3b30; }
+        .btn-select.selected { background-color: #ff3b30 !important; color: #ffffff !important; }
 
         .form-container {
             width: 100%; max-width: 400px;
@@ -69,14 +68,13 @@
     <h2>Спецификация компонентов</h2>
     <div class="subtitle">Выберите необходимые позиции и укажите данные доставки:</div>
 
-    <!-- Индикатор живой корзины -->
+    <!-- Зачищенный инфо-виджет -->
     <div class="cart-status">
         <div class="cart-title">🛒 Выбрано товаров: <span id="cart-count">0</span> шт.</div>
         <div class="cart-amount"><span id="cart-total">0</span> BYN</div>
     </div>
 
     <div class="catalog">
-        <!-- Карточка 1 -->
         <div class="product-card">
             <div class="product-info">
                 <div class="product-title">Комплект оптики (Тип А)</div>
@@ -86,7 +84,6 @@
             <button class="btn-select" onclick="toggleProduct(this, 'Тип А', 1200)">Выбрать</button>
         </div>
 
-        <!-- Карточка 2 -->
         <div class="product-card">
             <div class="product-info">
                 <div class="product-title">Комплект оптики (Тип Б)</div>
@@ -96,7 +93,6 @@
             <button class="btn-select" onclick="toggleProduct(this, 'Тип Б', 850)">Выбрать</button>
         </div>
 
-        <!-- Карточка 3 -->
         <div class="product-card">
             <div class="product-info">
                 <div class="product-title">Модуль доп. тюнинга</div>
@@ -119,46 +115,63 @@
 
         let orderCart = [];
 
-        // ФИКС ИМЕНИ ФУНКЦИИ: Теперь она железно совпадает с onclick="toggleProduct(...)"
         function toggleProduct(btn, title, cost) {
-            const idx = orderCart.findIndex(i => i.title === title);
-            if (idx === -1) {
-                orderCart.push({ title: title, cost: cost });
-                btn.textContent = "Убрать"; btn.classList.add("selected");
-            } else {
-                orderCart.splice(idx, 1);
-                btn.textContent = "Выбрать"; btn.classList.remove("selected");
+            try {
+                const idx = orderCart.findIndex(i => i.title === title);
+                if (idx === -1) {
+                    orderCart.push({ title: title, cost: cost });
+                    btn.textContent = "Убрать";
+                    btn.classList.add("selected");
+                } else {
+                    orderCart.splice(idx, 1);
+                    btn.textContent = "Выбрать";
+                    btn.classList.remove("selected");
+                }
+
+                // Безопасное обновление текста счетчиков
+                let sum = orderCart.reduce((acc, i) => acc + i.cost, 0);
+
+                let countEl = document.getElementById("cart-count");
+                let totalEl = document.getElementById("cart-total");
+
+                if (countEl) countEl.textContent = orderCart.length;
+                if (totalEl) totalEl.textContent = sum;
+
+                validateForm();
+            } catch (err) {
+                console.log("Ошибка в toggleProduct: " + err);
             }
-
-            // Динамически обновляем виджет корзины на экране
-            let sum = orderCart.reduce((acc, i) => acc + i.cost, 0);
-            document.getElementById("cart-count").textContent = orderCart.length;
-            document.getElementById("cart-total").textContent = sum;
-
-            validateForm();
         }
 
         function validateForm() {
-            const fio = document.getElementById("user_fio").value.trim();
-            const phone = document.getElementById("user_phone").value.trim();
+            try {
+                const fio = document.getElementById("user_fio").value.trim();
+                const phone = document.getElementById("user_phone").value.trim();
 
-            if (orderCart.length > 0 && fio.length > 5 && phone.length > 9) {
-                let sum = orderCart.reduce((acc, i) => acc + i.cost, 0);
-                tg.MainButton.text = `ПОДТВЕРДИТЬ И ОПЛАТИТЬ (${sum} BYN)`;
-                tg.MainButton.show();
-            } else {
-                tg.MainButton.hide();
+                if (orderCart.length > 0 && fio.length > 5 && phone.length > 9) {
+                    let sum = orderCart.reduce((acc, i) => acc + i.cost, 0);
+                    tg.MainButton.text = `ПОДТВЕРДИТЬ И ОПЛАТИТЬ (${sum} BYN)`;
+                    tg.MainButton.show();
+                } else {
+                    tg.MainButton.hide();
+                }
+            } catch (err) {
+                console.log("Ошибка в validateForm: " + err);
             }
         }
 
         tg.onEvent('mainButtonClicked', function() {
-            const fio = document.getElementById("user_fio").value.trim();
-            const phone = document.getElementById("user_phone").value.trim();
-            let itemsName = orderCart.map(i => i.title).join(' + ');
+            try {
+                const fio = document.getElementById("user_fio").value.trim();
+                const phone = document.getElementById("user_phone").value.trim();
+                let itemsName = orderCart.map(i => i.title).join(' + ');
 
-            let packet = `${itemsName}|||${fio}|||${phone}`;
-            tg.sendData(packet);
-            tg.close();
+                let packet = `${itemsName}|||${fio}|||${phone}`;
+                tg.sendData(packet);
+                tg.close();
+            } catch (err) {
+                console.log("Ошибка отправки данных: " + err);
+            }
         });
     </script>
 </body>
