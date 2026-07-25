@@ -69,25 +69,26 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        // Инициализируем WebApp
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
 
         let chosenItems = [];
 
         function selectItem(btnId, name, price) {
             const btn = document.getElementById(btnId);
+            if (!btn) return;
+
             const index = chosenItems.findIndex(i => i.name === name);
 
             if (index === -1) {
-                // Если товар не был выбран — выбираем его
                 chosenItems.push({ name: name, price: price });
                 btn.textContent = "Убрать";
-                btn.style.backgroundColor = "#ff3b30"; // Меняем на красный цвет
+                btn.style.backgroundColor = "#ff3b30";
             } else {
-                // Если товар уже в корзине — убираем его
                 chosenItems.splice(index, 1);
                 btn.textContent = "Выбрать";
-                btn.style.backgroundColor = "#0071e3"; // Возвращаем синий цвет
+                btn.style.backgroundColor = "#0071e3";
             }
             checkData();
         }
@@ -95,26 +96,26 @@
         function checkData() {
             const fio = document.getElementById("user_fio").value.trim();
             const phone = document.getElementById("user_phone").value.trim();
+            const tg = window.Telegram.WebApp;
 
-            // Включаем нижнюю кнопку ТГ, только если выбран товар и заполнены поля
             if (chosenItems.length > 0 && fio.length > 4 && phone.length > 8) {
                 let totalSum = chosenItems.reduce((sum, item) => sum + item.price, 0);
-                tg.MainButton.text = `ОФОРМИТЬ ЗАКАЗ (${totalSum} BYN)`;
+                tg.MainButton.text = "ОФОРМИТЬ ЗАКАЗ (" + totalSum + " BYN)";
                 tg.MainButton.show();
             } else {
                 tg.MainButton.hide();
             }
         }
 
-        tg.onEvent('mainButtonClicked', function() {
+        // Выносим отправку данных в изолированное русло
+        window.Telegram.WebApp.onEvent('mainButtonClicked', function() {
             const fio = document.getElementById("user_fio").value.trim();
             const phone = document.getElementById("user_phone").value.trim();
             let goodsList = chosenItems.map(i => i.name).join(' + ');
 
-            // Отправляем сквозную строку обратно в Python-код бота
-            tg.sendData(`${goodsList}|||${fio}|||${phone}`);
-            tg.close();
+            window.Telegram.WebApp.sendData(goodsList + "|||" + fio + "|||" + phone);
+            window.Telegram.WebApp.close();
         });
     </script>
 </body>
-</html> 
+</html>
