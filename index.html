@@ -85,6 +85,7 @@
         </div>
         <div class="menu-btn" onclick="goPage('catalog')"><span>📦</span> В каталог товаров</div>
         <div class="menu-btn" onclick="goPage('search')"><span>🔍</span> Поиск по витрине</div>
+        <div class="menu-btn" style="cursor: default;"><span>ℹ️</span> NEXUS: Премиальные компоненты кастомизации. Работаем 24/7. Доставка по всей стране.</div>
     </div>
 
     <!-- 📦 КАТАЛОГ -->
@@ -219,6 +220,7 @@
                 const userFio = document.getElementById('fio').value.trim();
                 const userPhone = document.getElementById('phone').value.trim();
                 const list = cart.map(c => c.name).join(' + ');
+                // Отправляем склеенный пакет данных обратно в Telegram-бота
                 tg.sendData(list + "|||" + userFio + "|||" + userPhone);
                 tg.close();
             });
