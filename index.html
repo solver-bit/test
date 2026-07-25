@@ -160,7 +160,7 @@
             tg.MainButton.hide();
         }
 
-        // Ассортимент по умолчанию (на случай, если ссылка открыта напрямую без параметров)
+        // Стартовый базовый ассортимент (запасной вариант)
         let ITEMS = [
             { id: 1, name: "Комплект оптики (Тип А)", price: 1200 },
             { id: 2, name: "Комплект оптики (Тип Б)", price: 850 },
@@ -169,21 +169,20 @@
             { id: 5, name: "Выхлопная система Спорт", price: 2100 }
         ];
 
-        // 🌌 ИИ-РАСПАКОВЩИК: Полностью пересобираем весь каталог ITEMS на лету
+        // 🌌 ИСПРАВЛЕННЫЙ ИИ-РАСПАКОВЩИК: Идеально читает русские буквы, переданные в Base64
         try {
             const urlParams = new URLSearchParams(window.location.search);
-            const dataParam = urlParams.get('pdata'); // Достаем зашифрованную ботом Base64 строку с ассортиментом
+            const dataParam = urlParams.get('pdata');
 
             if (dataParam) {
-                // Декодируем Unicode-строку из Base64 безопасным способом
-                const decodedJson = decodeURIComponent(atob(dataParam).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
+                // Декодируем из Base64 и расшифровываем UTF-8 символы кириллицы
+                const rawB64 = atob(dataParam);
+                const decodedJson = decodeURIComponent(rawB64);
 
                 const remoteItems = JSON.parse(decodedJson);
                 if (Array.isArray(remoteItems) && remoteItems.length > 0) {
-                    ITEMS = remoteItems; // Замещаем статический каталог динамическим из SQLite!
-                    console.log("[NEXUS LOG] Ассортимент успешно синхронизирован с базой данных:", ITEMS);
+                    ITEMS = remoteItems; // Замещаем на динамический каталог, полученный из SQLite
+                    console.log("[NEXUS LOG] Успешная синхронизация СУБД:", ITEMS);
                 }
             }
         } catch (e) {
