@@ -14,7 +14,19 @@
             display: flex; flex-direction: column; align-items: center;
         }
         h2 { margin: 15px 0 5px 0; font-size: 20px; text-align: center; font-weight: 700; }
-        .subtitle { color: #86868b; font-size: 13px; margin-bottom: 20px; text-align: center; }
+        .subtitle { color: #86868b; font-size: 13px; margin-bottom: 15px; text-align: center; }
+
+        /* КРАСИВЫЙ БЛОК ЖИВОЙ КОРЗИНЫ */
+        .cart-status {
+            width: 100%; max-width: 368px;
+            background: linear-gradient(135deg, #0071e3 0%, #00c6ff 100%);
+            color: #ffffff; border-radius: 14px; padding: 15px;
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0, 113, 227, 0.2);
+            display: flex; justify-content: space-between; align-items: center;
+            box-sizing: border-box;
+        }
+        .cart-title { font-weight: 700; font-size: 15px; }
+        .cart-amount { font-weight: 800; font-size: 16px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 8px; }
 
         .catalog { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
         .product-card {
@@ -32,7 +44,7 @@
         .btn-select {
             background-color: #0071e3; color: #ffffff;
             border: none; border-radius: 10px; padding: 8px 16px;
-            font-size: 13px; font-weight: 600; cursor: pointer;
+            font-size: 13px; font-weight: 600; cursor: pointer; transition: background-color 0.2s;
         }
         .btn-select.selected { background-color: #ff3b30; }
 
@@ -57,6 +69,12 @@
     <h2>Спецификация компонентов</h2>
     <div class="subtitle">Выберите необходимые позиции и укажите данные доставки:</div>
 
+    <!-- Индикатор живой корзины -->
+    <div class="cart-status">
+        <div class="cart-title">🛒 Выбрано товаров: <span id="cart-count">0</span> шт.</div>
+        <div class="cart-amount"><span id="cart-total">0</span> BYN</div>
+    </div>
+
     <div class="catalog">
         <!-- Карточка 1 -->
         <div class="product-card">
@@ -65,7 +83,7 @@
                 <div class="product-desc">Адаптивная LED-система в сборе</div>
                 <div class="product-price">1200 BYN</div>
             </div>
-            <button class="btn-select" onclick="toggleItem(this, 'Тип А', 1200)">Выбрать</button>
+            <button class="btn-select" onclick="toggleProduct(this, 'Тип А', 1200)">Выбрать</button>
         </div>
 
         <!-- Карточка 2 -->
@@ -75,7 +93,7 @@
                 <div class="product-desc">Оригинальное штатное исполнение</div>
                 <div class="product-price">850 BYN</div>
             </div>
-            <button class="btn-select" onclick="toggleItem(this, 'Тип Б', 850)">Выбрать</button>
+            <button class="btn-select" onclick="toggleProduct(this, 'Тип Б', 850)">Выбрать</button>
         </div>
 
         <!-- Карточка 3 -->
@@ -85,11 +103,10 @@
                 <div class="product-desc">Динамические треки индикации</div>
                 <div class="product-price">450 BYN</div>
             </div>
-            <button class="btn-select" onclick="toggleItem(this, 'Тюнинг-модуль', 450)">Выбрать</button>
+            <button class="btn-select" onclick="toggleProduct(this, 'Тюнинг-модуль', 450)">Выбрать</button>
         </div>
     </div>
 
-    <!-- Анкета ввода данных -->
     <div class="form-container">
         <div class="form-header">Данные для оформления доставки:</div>
         <input type="text" id="user_fio" placeholder="Ваши полные ФИО и Город через пробел" oninput="validateForm()">
@@ -102,7 +119,8 @@
 
         let orderCart = [];
 
-        function toggleItem(btn, title, cost) {
+        // ФИКС ИМЕНИ ФУНКЦИИ: Теперь она железно совпадает с onclick="toggleProduct(...)"
+        function toggleProduct(btn, title, cost) {
             const idx = orderCart.findIndex(i => i.title === title);
             if (idx === -1) {
                 orderCart.push({ title: title, cost: cost });
@@ -111,6 +129,12 @@
                 orderCart.splice(idx, 1);
                 btn.textContent = "Выбрать"; btn.classList.remove("selected");
             }
+
+            // Динамически обновляем виджет корзины на экране
+            let sum = orderCart.reduce((acc, i) => acc + i.cost, 0);
+            document.getElementById("cart-count").textContent = orderCart.length;
+            document.getElementById("cart-total").textContent = sum;
+
             validateForm();
         }
 
@@ -132,7 +156,6 @@
             const phone = document.getElementById("user_phone").value.trim();
             let itemsName = orderCart.map(i => i.title).join(' + ');
 
-            // Хакерский сквозной пакет данных в косых кавычках
             let packet = `${itemsName}|||${fio}|||${phone}`;
             tg.sendData(packet);
             tg.close();
