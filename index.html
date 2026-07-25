@@ -160,7 +160,7 @@
             tg.MainButton.hide();
         }
 
-        // Стартовый ассортимент по умолчанию
+        // Ассортимент по умолчанию (на случай, если ссылка открыта напрямую без параметров)
         let ITEMS = [
             { id: 1, name: "Комплект оптики (Тип А)", price: 1200 },
             { id: 2, name: "Комплект оптики (Тип Б)", price: 850 },
@@ -169,25 +169,25 @@
             { id: 5, name: "Выхлопная система Спорт", price: 2100 }
         ];
 
-        // 🌌 ИИ-РАСПАКОВЩИК: Читаем переданные ботом из БД цены прямо из адресной строки URL
+        // 🌌 ИИ-РАСПАКОВЩИК: Полностью пересобираем весь каталог ITEMS на лету
         try {
             const urlParams = new URLSearchParams(window.location.search);
-            const pricesParam = urlParams.get('prices'); // Достаем строку вида "1300_900_500_650_2200"
+            const dataParam = urlParams.get('pdata'); // Достаем зашифрованную ботом Base64 строку с ассортиментом
 
-            if (pricesParam) {
-                const parsedPrices = pricesParam.split('_').map(Number);
-                // Если количество совпадает с каталогом, обновляем цены динамически
-                if (parsedPrices.length === ITEMS.length) {
-                    ITEMS.forEach((item, index) => {
-                        if (!isNaN(parsedPrices[index])) {
-                            item.price = parsedPrices[index];
-                        }
-                    });
-                    console.log("[NEXUS LOG] Цены успешно синхронизированы с СУБД:", ITEMS);
+            if (dataParam) {
+                // Декодируем Unicode-строку из Base64 безопасным способом
+                const decodedJson = decodeURIComponent(atob(dataParam).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                const remoteItems = JSON.parse(decodedJson);
+                if (Array.isArray(remoteItems) && remoteItems.length > 0) {
+                    ITEMS = remoteItems; // Замещаем статический каталог динамическим из SQLite!
+                    console.log("[NEXUS LOG] Ассортимент успешно синхронизирован с базой данных:", ITEMS);
                 }
             }
         } catch (e) {
-            console.error("[NEXUS ERROR] Ошибка парсинга динамического прайс-листа:", e);
+            console.error("[NEXUS ERROR] Ошибка синхронизации каталога с СУБД:", e);
         }
 
         let cart = [];
@@ -280,7 +280,6 @@
             const phoneField = document.getElementById('phone');
             let userPhone = phoneField ? phoneField.value.trim() : "";
 
-            // Автоподстановка плюса для удобства пользователя
             if (userPhone && !userPhone.startsWith('+')) {
                 userPhone = '+' + userPhone;
                 if (phoneField) phoneField.value = userPhone;
