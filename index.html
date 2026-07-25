@@ -3,102 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Store</title>
+    <title>NEXUS Store</title>
     <script src="https://telegram.org"></script>
-    <style>
-        body {
-            font-family: sans-serif; background-color: #f5f5f7; color: #1d1d1f; margin: 0; padding: 15px;
-            display: flex; flex-direction: column; align-items: center;
-        }
-        h2 { margin: 15px 0 20px 0; font-size: 20px; text-align: center; }
-        .catalog { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
-        .product-card {
-            background-color: #ffffff; border-radius: 12px; padding: 15px;
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid #e5e5ea;
-        }
-        .product-title { font-weight: bold; font-size: 15px; }
-        .product-price { color: #0071e3; font-weight: bold; margin-top: 5px; }
-        .btn-select {
-            background-color: #0071e3; color: #ffffff; border: none; border-radius: 8px;
-            padding: 8px 16px; font-weight: bold; cursor: pointer; transition: background-color 0.2s;
-        }
-        .form-container {
-            width: 100%; max-width: 400px; background-color: #ffffff; border-radius: 12px;
-            padding: 15px; margin-top: 20px; box-sizing: border-box; border: 1px solid #e5e5ea;
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        input {
-            width: 100%; background-color: #f5f5f7; color: #1d1d1f; border: 1px solid #d2d2d7;
-            border-radius: 8px; padding: 10px; font-size: 14px; box-sizing: border-box; outline: none;
-        }
-        input:focus { border-color: #0071e3; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h2>Каталог товаров</h2>
-
-    <div class="catalog">
-        <div class="product-card">
-            <div>
-                <div class="product-title">Комплект оптики (Тип А)</div>
-                <div class="product-price">1200 BYN</div>
-            </div>
-            <button class="btn-select" id="btn1" onclick="selectItem('btn1', 'Тип А', 1200)">Выбрать</button>
+    <!-- 🏠 ГЛАВНАЯ СТРАНИЦА -->
+    <div id="page-main" class="page active">
+        <h2>Главная</h2>
+        <div class="hero-banner">
+            <h3>NEXUS Тюнинг Системы</h3>
+            <p>Добро пожаловать в цифровое приложение кастомизации. Выберите компоненты в каталоге, заполните данные и сформируйте автоматическую заявку прямо в чат бота.</p>
         </div>
-
-        <div class="product-card">
-            <div>
-                <div class="product-title">Комплект оптики (Тип Б)</div>
-                <div class="product-price">850 BYN</div>
+        <div class="features-grid">
+            <div class="feature-card" onclick="window.switchPage('catalog')">
+                <div>📦</div>
+                <span>В Каталог</span>
             </div>
-            <button class="btn-select" id="btn2" onclick="selectItem('btn2', 'Тип Б', 850)">Выбрать</button>
-        </div>
-
-        <div class="product-card">
-            <div>
-                <div class="product-title">Модуль доп. тюнинга</div>
-                <div class="product-price">450 BYN</div>
+            <div class="feature-card" onclick="window.switchPage('search')">
+                <div>🔍</div>
+                <span>Поиск</span>
             </div>
-            <button class="btn-select" id="btn3" onclick="selectItem('btn3', 'Тюнинг-модуль', 450)">Выбрать</button>
         </div>
     </div>
 
-    <div class="form-container">
-        <input type="text" id="user_fio" placeholder="Ваши ФИО и Город через пробел" oninput="checkData()">
-        <input type="text" id="user_phone" placeholder="Контактный телефон (+375...)" oninput="checkData()">
+    <!-- 📦 СТРАНИЦА КАТАЛОГА -->
+    <div id="page-catalog" class="page">
+        <h2>Каталог</h2>
+        <div id="catalog-list" class="catalog"></div>
     </div>
 
-    <script>
+    <!-- 🔍 СТРАНИЦА ПОИСКА -->
+    <div id="page-search" class="page">
+        <h2>Поиск компонентов</h2>
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" class="search-input" placeholder="Введите название детали...">
+        </div>
+        <div id="search-results" class="catalog">
+            <div class="cart-empty">Начните вводить название товара...</div>
+        </div>
+    </div>
+
+    <!-- 🛒 СТРАНИЦА КОРЗИНЫ -->
+    <div id="page-cart" class="page">
+        <h2>Корзина</h2>
+        <div id="cart-list" class="catalog"></div>
+        <div id="cart-empty-view" class="cart-empty">Корзина пуста. Перейдите в каталог, чтобы выбрать товары.</div>
+
+        <div id="order-form" class="form-container" style="display: none;">
+            <input type="text" id="user_fio" placeholder="Ваши ФИО и Город через пробел">
+            <input type="text" id="user_phone" placeholder="Контактный телефон (+375...)">
+        </div>
+    </div>
+
+    <!-- 📌 НАВИГАЦИОННАЯ ПАНЕЛЬ -->
+    <div class="navbar">
+        <div class="nav-item active" id="btn-nav-main" onclick="window.switchPage('main')">
+            <span class="icon">🏠</span><span>Главная</span>
+        </div>
+        <div class="nav-item" id="btn-nav-catalog" onclick="window.switchPage('catalog')">
+            <span class="icon">📦</span><span>Каталог</span>
+        </div>
+        <div class="nav-item" id="btn-nav-search" onclick="window.switchPage('search')">
+            <span class="icon">🔍</span><span>Поиск</span>
+        </div>
+        <div class="nav-item" id="btn-nav-cart" onclick="window.switchPage('cart')">
+            <div id="cart-badge" class="badge">0</div>
+            <span class="icon">🛒</span><span>Корзина</span>
+        </div>
+    </div>
+
+    <!-- МОДУЛЬНЫЙ СКРИПТ УПРАВЛЕНИЯ ПРИЛОЖЕНИЕМ -->
+    <script type="module">
+        import { PRODUCTS } from './products.js';
+
         const tg = window.Telegram?.WebApp;
         if (tg) { tg.ready(); tg.expand(); }
 
-        let chosenItems = [];
+        let cart = [];
 
-        function selectItem(btnId, name, price) {
-            const btn = document.getElementById(btnId);
-            if (!btn) return;
-            const index = chosenItems.findIndex(i => i.name === name);
+        window.switchPage = function(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-            if (index === -1) {
-                chosenItems.push({ name: name, price: price });
-                btn.textContent = "Убрать";
-                btn.style.backgroundColor = "#ff3b30";
-            } else {
-                chosenItems.splice(index, 1);
-                btn.textContent = "Выбрать";
-                btn.style.backgroundColor = "#0071e3";
-            }
-            checkData();
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            document.getElementById(`btn-nav-${pageId}`).classList.add('active');
+
+            if (pageId === 'cart') renderCart();
+            validateOrderForm();
         }
 
-        function checkData() {
-            if (!tg) return;
-            const fio = document.getElementById("user_fio").value.trim();
-            const phone = document.getElementById("user_phone").value.trim();
+        function renderCatalog() {
+            const container = document.getElementById('catalog-list');
+            if (container) container.innerHTML = PRODUCTS.map(prod => createProductCard(prod)).join('');
+        }
 
-            if (chosenItems.length > 0 && fio.length > 4 && phone.length > 8) {
-                let totalSum = chosenItems.reduce((sum, item) => sum + item.price, 0);
+        function createProductCard(prod) {
+            const isInCart = cart.some(item => item.id === prod.id);
+            const btnText = isInCart ? "Убрать" : "Выбрать";
+            const btnClass = isInCart ? "btn-select selected" : "btn-select";
+
+            return `
+                <div class="product-card">
+                    <div>
+                        <div class="product-title">${prod.name}</div>
+                        <div class="product-price">${prod.price} BYN</div>
+                    </div>
+                    <button class="${btnClass}" onclick="window.toggleCartItem(${prod.id})">${btnText}</button>
+                </div>
+            `;
+        }
+
+        window.toggleCartItem = function(id) {
+            const prod = PRODUCTS.find(p => p.id === id);
+            const index = cart.findIndex(item => item.id === id);
+
+            if (index === -1) cart.push(prod);
+            else cart.splice(index, 1);
+
+            updateBadges();
+            renderCatalog();
+
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) handleSearch(searchInput.value);
+
+            validateOrderForm();
+        }
+
+        function updateBadges() {
+            const badge = document.getElementById('cart-badge');
+            if (!badge) return;
+            if (cart.length > 0) {
+                badge.textContent = cart.length;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function handleSearch(query) {
+            const container = document.getElementById('search-results');
+            if (!container) return;
+            if (!query.trim()) {
+                container.innerHTML = `<div class="cart-empty">Начните вводить название товара...</div>`;
+                return;
+            }
+
+            const filtered = PRODUCTS.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="cart-empty">Ничего не найдено</div>`;
+            } else {
+                container.innerHTML = filtered.map(prod => createProductCard(prod)).join('');
+            }
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-list');
+            const emptyView = document.getElementById('cart-empty-view');
+            const formContainer = document.getElementById('order-form');
+
+            if (!container || !emptyView || !formContainer) return;
+
+            if (cart.length === 0) {
+                container.innerHTML = '';
+                emptyView.style.display = 'block';
+                formContainer.style.display = 'none';
+            } else {
+                emptyView.style.display = 'none';
+                formContainer.style.display = 'flex';
+                container.innerHTML = cart.map(prod => `
+                    <div class="product-card">
+                        <div>
+                            <div class="product-title">${prod.name}</div>
+                            <div class="product-price">${prod.price} BYN</div>
+                        </div>
+                        <button class="btn-select selected" onclick="window.toggleCartItem(${prod.id})">Убрать</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.validateOrderForm = function() {
+            if (!tg) return;
+            const activePageObj = document.querySelector('.page.active');
+            if (!activePageObj) return;
+
+            const activePage = activePageObj.id;
+            const fio = document.getElementById("user_fio")?.value.trim() || "";
+            const phone = document.getElementById("user_phone")?.value.trim() || "";
+
+            if (activePage === 'page-cart' && cart.length > 0 && fio.length > 4 && phone.length > 8) {
+                let totalSum = cart.reduce((sum, item) => sum + item.price, 0);
                 tg.MainButton.text = "ОФОРМИТЬ ЗАКАЗ (" + totalSum + " BYN)";
                 tg.MainButton.show();
             } else {
@@ -106,41 +203,24 @@
             }
         }
 
+        // Привязка событий ввода текста
+        document.getElementById('search-input')?.addEventListener('input', (e) => handleSearch(e.target.value));
+        document.getElementById('user_fio')?.addEventListener('input', () => window.validateOrderForm());
+        document.getElementById('user_phone')?.addEventListener('input', () => window.validateOrderForm());
+
         if (tg) {
-            tg.onEvent('mainButtonClicked', async function() {
+            tg.onEvent('mainButtonClicked', function() {
                 const fio = document.getElementById("user_fio").value.trim();
                 const phone = document.getElementById("user_phone").value.trim();
-                let goodsList = chosenItems.map(i => i.name).join(' + ');
-                let totalSum = chosenItems.reduce((sum, item) => sum + item.price, 0);
+                let goodsList = cart.map(i => i.name).join(' + ');
 
-                // Если Mini App открыт через Inline-кнопку, у нас есть initDataUnsafe.query_id
-                if (tg.initDataUnsafe?.query_id) {
-                    const data = {
-                        query_id: tg.initDataUnsafe.query_id,
-                        user_fio: fio,
-                        user_phone: phone,
-                        goods: goodsList,
-                        total: totalSum
-                    };
-
-                    // Отправляем данные на ваш бэкенд (замените URL на ваш рабочий сервер/хост)
-                    try {
-                        await fetch('https://your-backend-domain.com', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(data)
-                        });
-                        tg.close();
-                    } catch (error) {
-                        alert("Ошибка отправки данных на сервер!");
-                    }
-                } else {
-                    // Резервный вариант: если запустили из обычной клавиатуры
-                    tg.sendData(goodsList + "|||" + fio + "|||" + phone);
-                    tg.close();
-                }
+                tg.sendData(goodsList + "|||" + fio + "|||" + phone);
+                tg.close();
             });
         }
+
+        // Запуск
+        renderCatalog();
     </script>
 </body>
 </html>
